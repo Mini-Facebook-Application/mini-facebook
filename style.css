@@ -40,3 +40,10 @@ button {
     background: #eeeeee;
     border-radius: 4px;
 }
+.post{
+    margin-top:20px;
+    border:1px solid #ccc;
+    padding:15px;
+    border-radius:6px;
+    background:white;
+}
