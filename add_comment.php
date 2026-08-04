@@ -26,7 +26,7 @@ $user_id = $_SESSION["user_id"];
 if (
     !$post_id ||
     $content === "" ||
-    mb_strlen($content) > 1000
+    strlen($content) > 1000
 ) {
     http_response_code(400);
     exit("The comment information is not valid.");

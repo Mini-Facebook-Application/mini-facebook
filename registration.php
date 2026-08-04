@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($name === "") {
         $message = "Please enter your name.";
 
-    } elseif (mb_strlen($name) > 100) {
+    } elseif (strlen($name) > 100) {
         $message = "Name must be 100 characters or fewer.";
 
     } elseif (

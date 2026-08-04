@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (
         !$post_id ||
         $content === "" ||
-        mb_strlen($content) > 2000
+        strlen($content) > 2000
     ) {
         $message =
             "Post must contain 1 to 2000 characters.";

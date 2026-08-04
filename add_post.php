@@ -19,7 +19,7 @@ $user_id = $_SESSION["user_id"];
 // Validate the post content in PHP.
 if (
     $content === "" ||
-    mb_strlen($content) > 2000
+    strlen($content) > 2000
 ) {
     http_response_code(400);
     exit("Post must contain 1 to 2000 characters.");
