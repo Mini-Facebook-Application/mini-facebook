@@ -1,38 +1,10 @@
 <?php
 
-/*
-common.php
+// Shared session, database, and security functions.
 
-This file contains functions that will be shared by multiple pages.
-
-Instead of rewriting the same security code inside login.php,
-posts.php, editprofile.php, and other pages, those pages can include
-this file and use these functions.
-*/
-
-
-/*
-Start a PHP session if one has not already been started.
-
-Sessions allow the website to remember information about a logged-in
-user as they move between different pages.
-*/
 if (session_status() !== PHP_SESSION_ACTIVE) {
 
-    /*
-    Configure security settings for the session cookie.
-
-    httponly:
-    Prevents JavaScript from directly reading the session cookie.
-    This helps protect the cookie during an XSS attack.
-
-    secure:
-    Sends the session cookie only through HTTPS when HTTPS is active.
-
-    samesite:
-    Helps prevent another website from sending unwanted requests
-    using the user's session cookie.
-    */
+    // Configure secure session-cookie settings.
     session_set_cookie_params([
         "httponly" => true,
 
@@ -43,26 +15,14 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         "samesite" => "Strict"
     ]);
 
-    /*
-    Start the session after configuring the cookie settings.
-    */
     session_start();
 }
 
-
-/*
-Load the database connection from config.php.
-
-require_once makes sure config.php is loaded only once, even if
-another file already included it.
-*/
+// Load the database connection.
 require_once "config.php";
 
 
-/*
-Function: e()
-This function helps prevent stored and reflected XSS attacks.
-*/
+// Escape output to prevent XSS.
 function e($value)
 {
     return htmlspecialchars(
@@ -73,52 +33,21 @@ function e($value)
 }
 
 
-/*
-Function: csrf_token()
-
-A CSRF token helps confirm that a form submission came from a form
-created by this website, rather than from a malicious external site.
-*/
+// Create and store a CSRF token.
 function csrf_token()
 {
-    /*
-    If the session does not have a token yet, create one.
-
-    random_bytes(32) creates 32 secure random bytes.
-    bin2hex() converts those bytes into text that can be placed
-    safely inside an HTML form.
-    */
     if (empty($_SESSION["csrf_token"])) {
         $_SESSION["csrf_token"] =
             bin2hex(random_bytes(32));
     }
 
-    /*
-    Return the token so another function or form can use it.
-    */
     return $_SESSION["csrf_token"];
 }
 
 
-/*
-Function: csrf_input()
-
-Purpose:
-Create the hidden CSRF input that will be placed inside HTML forms.
-
-The browser submits this hidden value with the rest of the form.
-
-Example use inside a form:
-
-<form method="post">
-    <?php echo csrf_input(); ?>
-</form>
-*/
+// Create a hidden CSRF form field.
 function csrf_input()
 {
-    /*
-    e() safely escapes the token before placing it in HTML.
-    */
     return
         '<input type="hidden" name="csrf_token" value="'
         . e(csrf_token())
@@ -126,79 +55,116 @@ function csrf_input()
 }
 
 
-/*
-Function: verify_csrf()
-
-Purpose:
-Check that a submitted POST form contains the correct CSRF token.
-
-This function will be called before processing actions such as:
-
-- Creating a post
-- Editing a post
-- Deleting a post
-- Adding a comment
-- Editing a profile
-- Changing a password
-*/
+// Verify the submitted CSRF token.
 function verify_csrf()
 {
-    /*
-    Read the token submitted by the form.
+    $submitted_token =
+        $_POST["csrf_token"] ?? "";
 
-    The ?? operator uses an empty string if csrf_token was not
-    included in the POST request.
-    */
-    $submitted_token = $_POST["csrf_token"] ?? "";
-
-    /*
-    First, confirm that the submitted token is a string.
-
-    Then use hash_equals() to securely compare the submitted token
-    with the token stored in the user's session.
-    */
     if (
-        !is_string($submitted_token)
-        || !hash_equals(
+        !is_string($submitted_token) ||
+        !hash_equals(
             csrf_token(),
             $submitted_token
         )
     ) {
-        /*
-        HTTP status code 403 means that the request is forbidden.
-        The requested action will not be completed.
-        */
         http_response_code(403);
         exit("Invalid CSRF token.");
     }
 }
 
 
-/*
-Function: require_login()
-Protect pages that should only be available to logged-in users.
-*/
+// Clear the current session.
+function end_user_session()
+{
+    $_SESSION = [];
+    session_destroy();
+}
+
+
+// Require a valid logged-in user.
 function require_login()
 {
+    global $conn;
+
     if (empty($_SESSION["user_id"])) {
         header("Location: login.php");
         exit;
     }
+
+    $current_time = time();
+
+    // End the session after 30 minutes of inactivity.
+    if (
+        !empty($_SESSION["last_activity"]) &&
+        $current_time -
+        (int) $_SESSION["last_activity"] > 1800
+    ) {
+        end_user_session();
+
+        header("Location: login.php?expired=1");
+        exit;
+    }
+
+    // Check whether the browser information changed.
+    $current_agent = hash(
+        "sha256",
+        $_SERVER["HTTP_USER_AGENT"] ?? "unknown"
+    );
+
+    if (
+        empty($_SESSION["user_agent"]) ||
+        !hash_equals(
+            $_SESSION["user_agent"],
+            $current_agent
+        )
+    ) {
+        end_user_session();
+
+        header("Location: login.php?expired=1");
+        exit;
+    }
+
+    // Record the user's latest activity time.
+    $_SESSION["last_activity"] = $current_time;
+
+    $user_id = $_SESSION["user_id"];
+
+    // Check the current role and account status.
+    $stmt = $conn->prepare(
+        "SELECT role, is_disabled
+         FROM users
+         WHERE id = ?"
+    );
+
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+
+    $user = $stmt->get_result()->fetch_assoc();
+
+    $stmt->close();
+
+    // End access if the account is missing or disabled.
+    if (
+        !$user ||
+        (int) $user["is_disabled"] === 1
+    ) {
+        end_user_session();
+
+        header("Location: login.php?disabled=1");
+        exit;
+    }
+
+    // Keep the session role synchronized with the database.
+    $_SESSION["role"] = $user["role"];
 }
 
 
-/*
-Function: require_superuser()
-*/
+// Require the user to be a superuser.
 function require_superuser()
 {
     require_login();
 
-    /*
-    If no role exists in the session, "user" is used as the
-    safe default. This prevents a missing role from being treated
-    as a superuser.
-    */
     if (
         ($_SESSION["role"] ?? "user")
         !== "superuser"
