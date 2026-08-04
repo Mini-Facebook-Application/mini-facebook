@@ -1,49 +1,220 @@
 body {
-    font-family: Arial, sans-serif;
-    background: #f4f4f4;
     margin: 0;
+    background: #f6f4fb;
+    color: #27233a;
+    font-family: Arial, sans-serif;
 }
 
 .container {
-    max-width: 500px;
+    max-width: 620px;
     margin: 60px auto;
-    background: white;
     padding: 30px;
+    background: white;
     border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(45, 35, 75, 0.1);
 }
+
+.feed-container,
+.admin-container {
+    max-width: 850px;
+}
+
+
+/* Headings and links */
 
 h1 {
     text-align: center;
+}
+
+a {
+    color: #513a91;
+}
+
+.page-heading,
+.post-header,
+.post-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 label {
     display: block;
     margin-top: 15px;
     margin-bottom: 5px;
+    font-weight: 600;
 }
 
-input {
+input,
+textarea {
     width: 100%;
     padding: 10px;
     box-sizing: border-box;
+    border: 1px solid #b8b2c8;
+    border-radius: 5px;
+    font: inherit;
+}
+
+input:disabled {
+    background: #eeeeee;
 }
 
 button {
     width: 100%;
     margin-top: 20px;
     padding: 12px;
+    border: 0;
+    border-radius: 5px;
+    background: #6246a8;
+    color: white;
+    font-weight: 600;
     cursor: pointer;
 }
 
+button:hover,
+.button-secondary:hover,
+.button-danger:hover {
+    opacity: 0.88;
+}
+
+
+/* Status messages */
+
 .message {
+    margin: 15px 0;
     padding: 10px;
     background: #eeeeee;
     border-radius: 4px;
 }
-.post{
-    margin-top:20px;
-    border:1px solid #ccc;
-    padding:15px;
-    border-radius:6px;
-    background:white;
+
+
+/* Create-post area */
+
+.card-section {
+    margin: 20px 0;
+    padding: 18px;
+    border: 1px solid #d8d2e6;
+    border-radius: 7px;
+}
+
+.card-section h2 {
+    font-size: 1.2rem;
+}
+
+
+/* Posts */
+
+.post {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: white;
+}
+
+.post h2 {
+    font-size: 1.2rem;
+}
+
+.post small {
+    color: #666;
+}
+
+
+/* Comments */
+
+.comments {
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid #ddd;
+}
+
+.comments h3 {
+    font-size: 1rem;
+}
+
+.comment {
+    margin: 8px 0;
+    padding: 9px;
+    background: #f2eff8;
+    border-radius: 5px;
+}
+
+.comment small {
+    display: block;
+    color: #666;
+}
+
+.comment-form button {
+    width: auto;
+    padding: 8px 14px;
+}
+
+
+/* Inline links and action buttons */
+
+.inline-form {
+    display: inline;
+}
+
+.inline-form button,
+.button-secondary,
+.button-danger,
+.link-button {
+    display: inline-block;
+    width: auto;
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.button-secondary {
+    background: #ddd6ee;
+    color: #35255c;
+}
+
+.button-danger {
+    background: #a8324a;
+    color: white;
+}
+
+.link-button {
+    padding: 0;
+    background: none;
+    color: #513a91;
+    text-decoration: underline;
+}
+
+
+/* Superuser table */
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-table th,
+.user-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+
+/* Mobile layout */
+
+@media (max-width: 700px) {
+
+    .container {
+        margin: 20px 12px;
+        padding: 20px;
+    }
+
+    .page-heading,
+    .post-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
