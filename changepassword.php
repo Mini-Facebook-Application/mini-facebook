@@ -1,89 +1,177 @@
 <?php
-session_start();
-include "config.php";
 
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit();
-}
+// Load security functions and require login.
+require_once "common.php";
+require_login();
 
 $message = "";
 $user_id = $_SESSION["user_id"];
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// Process the password-change form.
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $current_password = $_POST["current_password"];
-    $new_password = $_POST["new_password"];
+    // Protect the form against CSRF attacks.
+    verify_csrf();
 
-    $sql = "SELECT password FROM users WHERE id = ?";
-    $stmt = $conn->prepare($sql);
+    $current_password =
+        $_POST["current_password"] ?? "";
+
+    $new_password =
+        $_POST["new_password"] ?? "";
+
+    $confirm_password =
+        $_POST["confirm_password"] ?? "";
+
+    // Get the user's current password hash.
+    $stmt = $conn->prepare(
+        "SELECT password FROM users WHERE id = ?"
+    );
+
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
 
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
-    if (!password_verify($current_password, $user["password"])) {
+    $stmt->close();
 
+    // Validate the current and new passwords.
+    if (
+        !$user ||
+        !password_verify(
+            $current_password,
+            $user["password"]
+        )
+    ) {
         $message = "Current password is incorrect.";
 
     } elseif (strlen($new_password) < 8) {
+        $message =
+            "New password must be at least 8 characters.";
 
-        $message = "New password must be at least 8 characters.";
+    } elseif ($new_password !== $confirm_password) {
+        $message = "New passwords do not match.";
 
     } else {
 
-        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+        // Hash the new password before saving it.
+        $hashed_password = password_hash(
+            $new_password,
+            PASSWORD_DEFAULT
+        );
 
-        $sql = "UPDATE users SET password = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("si", $hashed_password, $user_id);
+        $stmt = $conn->prepare(
+            "UPDATE users
+             SET password = ?
+             WHERE id = ?"
+        );
+
+        $stmt->bind_param(
+            "si",
+            $hashed_password,
+            $user_id
+        );
 
         if ($stmt->execute()) {
             $message = "Password updated successfully.";
+
+            // Create a new session ID after the password change.
+            session_regenerate_id(true);
         } else {
             $message = "Password update failed.";
         }
+
+        $stmt->close();
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Change Password</title>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Change Password | miniFacebook</title>
+
+    <!-- Open-source Bootstrap framework -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    >
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="container">
+    <main class="container">
 
-<h1>Change Password</h1>
+        <h1>Change Password</h1>
 
-<p><a href="index.php">Back to Home</a></p>
+        <p>
+            <a href="index.php">Back to Home</a>
+        </p>
 
-<?php
-if ($message != "") {
-    echo "<p>$message</p>";
-}
-?>
+        <?php if ($message !== ""): ?>
+            <p class="message">
+                <?= e($message) ?>
+            </p>
+        <?php endif; ?>
 
-<form method="post">
+        <form method="post" action="changepassword.php">
 
-<label>Current Password</label>
-<input type="password" name="current_password" required>
+            <!-- Hidden CSRF token -->
+            <?= csrf_input() ?>
 
-<label>New Password</label>
-<input type="password" name="new_password" required>
+            <label for="current_password">
+                Current Password
+            </label>
 
-<button type="submit">
-Update Password
-</button>
+            <input
+                type="password"
+                id="current_password"
+                name="current_password"
+                required
+            >
 
-</form>
+            <label for="new_password">
+                New Password
+            </label>
 
-</div>
+            <input
+                type="password"
+                id="new_password"
+                name="new_password"
+                required
+                minlength="8"
+            >
+
+            <label for="confirm_password">
+                Confirm New Password
+            </label>
+
+            <input
+                type="password"
+                id="confirm_password"
+                name="confirm_password"
+                required
+                minlength="8"
+            >
+
+            <button type="submit">
+                Update Password
+            </button>
+
+        </form>
+
+    </main>
 
 </body>
+
 </html>
