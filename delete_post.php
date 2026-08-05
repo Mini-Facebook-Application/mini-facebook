@@ -5,7 +5,7 @@ require_once "common.php";
 require_login();
 
 // Only accept form submissions using POST.
-if ($_SERVER["REQUEST_METHOD"] !== " "POST") {
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     http_response_code(405);
     exit("Method not allowed.");
 }
