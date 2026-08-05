@@ -5,12 +5,9 @@ A secure miniFacebook web application built with PHP and MySQL.
 ## Project Links
 
 - Application: https://waph-team03.minifacebook.com
-- Team website: [`https://waph-uc-sm26-team03.github.io/`](https://waph-uc-sm26-team03.github.io/)
+- Team website: https://waph-uc-sm26-team03.github.io/
 - Video demonstration: https://youtu.be/_F9rm0UIvZQ?si=PFXYtNVOl6mMk_0L
-- Private repository: `https://github.com/waph-uc-sm26-team03/waph-teamproject`
-
----
-
+- Private repository: https://github.com/waph-uc-sm26-team03/waph-teamproject
 # HTTPS Deployment
 
 The application is deployed using HTTPS.
