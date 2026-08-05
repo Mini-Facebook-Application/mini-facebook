@@ -44,7 +44,11 @@ require_login();
                     View and Manage Posts
                 </a>
             </p>
-
+            <p>
+                <a href="chat.php">
+                    Live Chat
+                </a>
+            </p>
             <p>
                 <a href="editprofile.php">
                     Edit Profile
