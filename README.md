@@ -196,6 +196,63 @@ WHERE email = 'admin@example.com';
 ```
 
 ---
+# Development and Contributions
+
+## Sprint 1
+
+**Duration:** July 26, 2026 – July 27, 2026
+
+**Hinna Parwez**
+
+- Created the MySQL database.
+- Implemented registration, login, and logout.
+- Added session management.
+- Implemented profile editing and password changing.
+- Implemented viewing posts from MySQL.
+- Tested the application using Apache.
+
+## Final Development
+
+**Duration:** August 3, 2026 – August 5, 2026
+
+**Hinna Parwez**
+
+- Implemented creating, editing, and deleting posts.
+- Added comments on posts.
+- Enforced post ownership.
+- Added CSRF and XSS protection.
+- Strengthened session security.
+- Added regular-user and superuser roles.
+- Added superuser account management.
+- Added account disabling and enabling.
+- Expanded and migrated the database.
+- Deployed and tested the updated application.
+- Completed the report and source-code appendix.
+
+# Deployment and Testing Results
+
+The application was deployed at:
+
+https://waph-team03.minifacebook.com
+
+The following features were successfully tested:
+
+- User registration
+- Login and logout
+- Password hashing and verification
+- Profile editing
+- Password changing
+- Post creation, editing, and deletion
+- Commenting on another user’s post
+- Post ownership controls
+- Superuser access control
+- Viewing registered users
+- Disabling and enabling users
+- Session protection
+- CSRF protection
+- XSS output sanitization
+- Responsive Bootstrap styling
+- HTTPS deployment using the course certificate
 
 # Appendix: Source Code
 
